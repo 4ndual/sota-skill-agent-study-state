@@ -13,7 +13,12 @@ The canonical ledger and backup receipts are intentionally independent, not
 byte-identical. They are reconciled by `report_id`, `artifact_key`,
 `benchmark_claim_key`, `previous_receipt_hash`, and `receipt_hash`.
 
-## Published reports
+## Reader-facing daily briefings
+
+- [2026-08-09 Small-Skill Brief](deliveries/2026-08-09-small-skill-brief.md)
+- [2026-08-09 Harness Brief](deliveries/2026-08-09-harness-brief.md)
+
+## Internal evidence reports
 
 - [2026-08-09 Small-Skill SOTA](results/2026-08-09-small-skill-sota.md)
 - [2026-08-09 Harness and Plugins SOTA](results/2026-08-09-harness-plugins-sota.md)
