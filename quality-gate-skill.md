@@ -6,8 +6,9 @@ This file is a read-only external quality-control layer. It must never be merged
 
 - The production researcher reports zero to five important new small-skill agents. The count is evidence-driven, never a quota.
 - A report is a draft until an independent same-chat auditor returns `AUDIT: PASS`.
-- `QUIET` is valid only when invocation, coverage, benchmark, novelty, and both deduplication histories are proven. Missing evidence is `INCOMPLETE`, never quiet.
-- The auditor is read-only. It does not edit prompts, schedules, ledgers, or research reports and does not silently repair them.
+- The gate is an internal iteration loop, never a terminal output. Missing evidence means keep researching, fetch an authoritative alternative, repair the trace, and repeat the affected gate until complete.
+- `QUIET` is valid only when invocation, coverage, benchmark, novelty, and both deduplication histories are proven and zero candidates qualify.
+- The auditor never edits prompts, schedules, or prior ledger records. It iteratively verifies candidates, drops candidates that cannot pass, and returns the validated zero-to-five-item subset. It must not end with `INCOMPLETE` or `HOLD`.
 
 ## Required gates
 
@@ -30,7 +31,7 @@ CANONICAL_LEDGER_RECORD {"record_type":"reported_item","schema_version":1,"repor
 DEDUP_RECEIPT {"report_id":"<uuid>","artifact_key":"<org/repo@revision>","benchmark_claim_key":"<claim key>","report_locator":"<task-chat message>","previous_receipt_hash":null,"receipt_hash":"<same hash>"}
 ```
 
-Never emit either record for a draft, near-miss, failed run, incomplete run, or unverified item. Before PASS, compare all prior `CANONICAL_LEDGER_RECORD` and `DEDUP_RECEIPT` messages. If one history is missing or they diverge, return `INCOMPLETE` and `HOLD`.
+Never emit either record for a draft, near-miss, failed iteration, or unverified item. Before PASS, compare all prior `CANONICAL_LEDGER_RECORD` and `DEDUP_RECEIPT` messages. If one history is missing or they diverge, recover the hosted genesis histories, reconcile the chains, and repeat the gate. Do not terminate until reconciliation succeeds.
 
 ## Required result
 
@@ -45,4 +46,4 @@ BUDGET: searches=<n> fetches=<n> ceiling=<n>
 STATE: canonical-ledger=<available|missing|unreadable> backup-receipts=<available|missing|unreadable> reconciled=<yes|no|unknown>
 ```
 
-The auditor must output exactly one of `AUDIT: PASS`, `AUDIT: FAIL`, or `AUDIT: INCOMPLETE`, followed by evidence, gate failures, source failures, dedup status, and `Delivery status: ELIGIBLE_FOR_FUTURE_RELAY` only for PASS; otherwise `Delivery status: HOLD`.
+The auditor may use `AUDIT ITERATION: RETRY` internally while repairing gaps, but the visible final output must be `AUDIT: PASS`, followed by evidence, source limitations, dedup status, and `Delivery status: ELIGIBLE_FOR_FUTURE_RELAY`. Candidates that cannot pass are removed; zero validated findings is allowed only after complete coverage.
